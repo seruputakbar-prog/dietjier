@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Fitness OS v3</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {background:#0f0f0f;color:white;font-family:Arial;padding:20px;}
+.card {background:#1c1c1c;padding:15px;margin:10px 0;border-radius:10px;}
+button {background:#ff4444;color:white;padding:10px;border:none;border-radius:8px;}
+input,select {width:100%;padding:8px;margin:5px 0;}
+</style>
+</head>
+
+<body>
+
+<h1>🔥 Fitness OS v3</h1>
+
+<div class="card">
+<h2>📊 Kalkulator</h2>
+<input id="berat" placeholder="Berat">
+<input id="tinggi" placeholder="Tinggi">
+<input id="umur" placeholder="Umur">
+<select id="aktivitas">
+<option value="1.2">Jarang</option>
+<option value="1.4">Ringan</option>
+<option value="1.55">Sedang</option>
+</select>
+<button onclick="hitung()">Hitung</button>
+<p id="hasil"></p>
+<p id="protein"></p>
+</div>
+
+<div class="card">
+<h2>⚖️ Track Berat</h2>
+<input id="inputBerat" placeholder="Berat hari ini">
+<button onclick="tambahBerat()">Tambah</button>
+<canvas id="chart"></canvas>
+</div>
+
+<div class="card">
+<h2>🤖 AI Meal Generator</h2>
+<select id="gaya">
+<option value="hemat">Anak Kos</option>
+<option value="normal">Normal</option>
+<option value="mewah">Mewah</option>
+</select>
+<button onclick="generateMeal()">Generate</button>
+<p id="meal"></p>
+</div>
+
+<div class="card">
+<h2>🍽️ Anti Lapar Mode</h2>
+<button onclick="antiLapar()">Cek Lapar</button>
+<p id="lapar"></p>
+</div>
+
+<div class="card">
+<h2>🔔 Reminder</h2>
+<button onclick="startReminder()">Aktifkan Reminder</button>
+<p id="reminderStatus"></p>
+</div>
+
+<script>
+let dataBerat = JSON.parse(localStorage.getItem("berat")) || [];
+
+function renderChart(){
+new Chart(document.getElementById("chart"),{
+type:'line',
+data:{labels:dataBerat.map((_,i)=>i+1),
+datasets:[{label:"Berat",data:dataBerat}]}
+});
+}
+renderChart();
+
+function tambahBerat(){
+let val = inputBerat.value;
+dataBerat.push(Number(val));
+localStorage.setItem("berat", JSON.stringify(dataBerat));
+location.reload();
+}
+
+function hitung(){
+let b=berat.value,t=tinggi.value,u=umur.value,a=aktivitas.value;
+let bmr=10*b+6.25*t-5*u+5;
+let tdee=bmr*a;
+hasil.innerHTML="Kalori: "+Math.round(tdee)+" | Defisit: "+Math.round(tdee-500);
+protein.innerHTML="Protein: "+Math.round(b*1)+"g";
+}
+
+function generateMeal(){
+let gaya=gayaSelect=document.getElementById("gaya").value;
+
+let data={
+hemat:[
+"Nasi + telur + tempe + sayur",
+"Mie + telur + sawi",
+"Nasi + tahu + sambal",
+"Telur dadar + nasi + kol"
+],
+normal:[
+"Ayam + nasi + sayur",
+"Ikan + nasi + tumis",
+"Bakso + nasi",
+"Ayam + telur + nasi"
+],
+mewah:[
+"Steak + kentang + salad",
+"Salmon + nasi merah",
+"Chicken grill + sayur",
+"Beef bowl + telur"
+]
+};
+
+let pilih=data[gaya];
+meal.innerHTML=pilih[Math.floor(Math.random()*pilih.length)];
+}
+
+function antiLapar(){
+let jam=new Date().getHours();
+
+if(jam>=20){
+lapar.innerHTML="⚠️ Lapar malam! Minum air + makan telur / buah";
+}else if(jam>=15){
+lapar.innerHTML="⚠️ Jam rawan ngemil! Ambil buah aja";
+}else{
+lapar.innerHTML="Aman, lanjut pola makan normal 👍";
+}
+}
+
+function startReminder(){
+Notification.requestPermission().then(()=>{
+setInterval(()=>{
+new Notification("⏰ Waktunya jaga badan!",{
+body:"Minum air / jalan / makan teratur"
+});
+}, 60000);
+reminderStatus.innerHTML="Reminder aktif!";
+});
+}
+</script>
+
+</body>
+</html>
